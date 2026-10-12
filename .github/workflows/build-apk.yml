@@ -18,7 +18,12 @@ jobs:
         run: |
           rm -f local.properties
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          set +e
+          ./gradlew assembleDebug --console=plain > build.log 2>&1
+          code=$?
+          echo "===== ERROR SUMMARY ====="
+          grep -E "^e: |What went wrong|error:|AAPT|Could not" -A4 build.log | head -150
+          exit $code
       - uses: actions/upload-artifact@v4
         with:
           name: ProLensAI-debug-apk

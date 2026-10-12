@@ -17,6 +17,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -137,9 +139,12 @@ fun CameraScreen(vm: CameraViewModel) {
     ) {
         TopBar(vm, iconRotation)
 
-        // ------------------------------------------------ viewfinder
+        // ------------------------------------------------ viewfinder (+ panels slide up over it)
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+        val panelMax = maxHeight * 0.72f
         Box(
             Modifier
+                .align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .aspectRatio(vm.aspect.ratio)
                 .clip(RoundedCornerShape(18.dp))
@@ -203,6 +208,33 @@ fun CameraScreen(vm: CameraViewModel) {
             Toast(vm, Modifier.align(Alignment.Center))
         }
 
+        AnimatedVisibility(
+            vm.panel != Panel.NONE,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = fadeIn() + slideInVertically { it / 2 },
+            exit = fadeOut() + slideOutVertically { it / 2 },
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = panelMax)
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 6.dp)
+            ) {
+                when (vm.panel) {
+                    Panel.AI -> AiPanel(vm)
+                    Panel.PRO -> ProPanel(vm)
+                    Panel.LOOKS -> Box(
+                        Modifier.padding(horizontal = 12.dp).clip(RoundedCornerShape(20.dp))
+                            .background(Pro.Panel).padding(vertical = 12.dp)
+                    ) { LooksPanel(vm) }
+                    Panel.BOKEH -> BokehPanel(vm)
+                    Panel.NONE -> {}
+                }
+            }
+        }
+        }
+
         // ------------------------------------------------ tools
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
@@ -212,30 +244,6 @@ fun CameraScreen(vm: CameraViewModel) {
             SectionTab(Icons.Rounded.Tune, "Pro", vm.panel == Panel.PRO, { vm.panel = toggle(vm.panel, Panel.PRO) })
             SectionTab(Icons.Rounded.FilterVintage, "Looks", vm.panel == Panel.LOOKS, { vm.panel = toggle(vm.panel, Panel.LOOKS) })
             SectionTab(Icons.Rounded.BlurOn, "Bokeh", vm.panel == Panel.BOKEH, { vm.panel = toggle(vm.panel, Panel.BOKEH) })
-        }
-
-        Box(Modifier.weight(1f).fillMaxWidth()) {
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                AnimatedVisibility(
-                    vm.panel != Panel.NONE,
-                    enter = fadeIn() + slideInVertically { it / 3 },
-                    exit = fadeOut() + slideOutVertically { it / 3 },
-                ) {
-                    Box(Modifier.wrapContentHeight()) {
-                        when (vm.panel) {
-                            Panel.AI -> AiPanel(vm)
-                            Panel.PRO -> ProPanel(vm)
-                            Panel.LOOKS -> LooksPanel(vm)
-                            Panel.BOKEH -> BokehPanel(vm)
-                            Panel.NONE -> {}
-                        }
-                    }
-                }
-                if (vm.panel == Panel.NONE) {
-                    // Compact coach line when panels are closed
-                    CoachLine(vm)
-                }
-            }
         }
 
         // ------------------------------------------------ mode dial + shutter

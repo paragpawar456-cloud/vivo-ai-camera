@@ -17,25 +17,25 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
-      - name: Build debug APK
+      - name: Build optimized APK
         run: |
           rm -f local.properties
           chmod +x gradlew
           set +e
-          ./gradlew assembleDebug --console=plain > build.log 2>&1
+          ./gradlew assembleRelease --console=plain > build.log 2>&1
           code=$?
           echo "===== ERROR SUMMARY ====="
           grep -E "^e: |What went wrong|error:|AAPT|Could not" -A4 build.log | head -150
           exit $code
       - uses: actions/upload-artifact@v4
         with:
-          name: ProLensAI-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: ProLensAI-apk
+          path: app/build/outputs/apk/release/*.apk
       - name: Publish APK as the "latest" release (easy phone download)
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk ProLensAI.apk
+          cp app/build/outputs/apk/release/app-release.apk ProLensAI.apk
           gh release delete latest -y --cleanup-tag || true
           gh release create latest ProLensAI.apk --title "ProLens AI (latest build)" --notes "Install ProLensAI.apk on your phone (allow installs from unknown sources)."

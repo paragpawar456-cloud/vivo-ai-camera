@@ -20,7 +20,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8: removes unused code (e.g. the thousands of icons we don't use) and unused resources
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
         }
     }

@@ -202,7 +202,8 @@ fun CameraScreen(vm: CameraViewModel) {
             ) {
                 ZoomChips(vm.zoom, vm.minZoom, vm.maxZoom, vm.caps.equivalentFocalMm, onZoom = { vm.userZoom(it) })
                 Spacer(Modifier.height(8.dp))
-                ReadoutStrip(readouts(vm), vm.meterStops)
+                // Technical numbers only matter in Manual mode
+                if (vm.mode == ShootMode.PRO) ReadoutStrip(readouts(vm), vm.meterStops)
             }
 
             Toast(vm, Modifier.align(Alignment.Center))
@@ -216,10 +217,10 @@ fun CameraScreen(vm: CameraViewModel) {
             Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            SectionTab(Icons.Rounded.AutoAwesome, "AI Coach", vm.panel == Panel.AI, { vm.panel = toggle(vm.panel, Panel.AI) })
-            SectionTab(Icons.Rounded.Tune, "Pro", vm.panel == Panel.PRO, { vm.panel = toggle(vm.panel, Panel.PRO) })
-            SectionTab(Icons.Rounded.FilterVintage, "Looks", vm.panel == Panel.LOOKS, { vm.panel = toggle(vm.panel, Panel.LOOKS) })
-            SectionTab(Icons.Rounded.BlurOn, "Bokeh", vm.panel == Panel.BOKEH, { vm.panel = toggle(vm.panel, Panel.BOKEH) })
+            SectionTab(Icons.Rounded.AutoAwesome, "Tips", vm.panel == Panel.AI, { vm.panel = toggle(vm.panel, Panel.AI) })
+            SectionTab(Icons.Rounded.Tune, "Manual", vm.panel == Panel.PRO, { vm.panel = toggle(vm.panel, Panel.PRO) })
+            SectionTab(Icons.Rounded.FilterVintage, "Filters", vm.panel == Panel.LOOKS, { vm.panel = toggle(vm.panel, Panel.LOOKS) })
+            SectionTab(Icons.Rounded.BlurOn, "Blur", vm.panel == Panel.BOKEH, { vm.panel = toggle(vm.panel, Panel.BOKEH) })
         }
 
         // ------------------------------------------------ mode dial + shutter
@@ -292,10 +293,10 @@ private fun TopBar(vm: CameraViewModel, rotation: Float) {
             "Grid", active = vm.grid != GridType.OFF, rotation = rotation,
         ) { vm.cycleGrid() }
         GlassIcon(Icons.Rounded.Straighten, "Level", active = vm.showLevel, rotation = rotation) { vm.toggleLevel() }
-        GlassIcon(Icons.Rounded.BarChart, "Histogram", active = vm.showHistogram, rotation = rotation) { vm.toggleHistogram() }
+        GlassIcon(Icons.Rounded.BarChart, "Light graph", active = vm.showHistogram, rotation = rotation) { vm.toggleHistogram() }
         Box(Modifier.weight(1f))
         if (vm.vendorAvailable) {
-            Pill("Vivo engine", icon = Icons.Rounded.Memory, selected = vm.vendorOn) { vm.toggleVendor() }
+            Pill("Vivo boost", icon = Icons.Rounded.Memory, selected = vm.vendorOn) { vm.toggleVendor() }
             Spacer(Modifier.width(6.dp))
         }
         Pill(vm.aspect.label, icon = Icons.Rounded.AspectRatio) { vm.cycleAspect() }
@@ -305,12 +306,12 @@ private fun TopBar(vm: CameraViewModel, rotation: Float) {
 @Composable
 private fun AiBadge(vm: CameraViewModel, modifier: Modifier) {
     if (vm.mode == ShootMode.PRO) {
-        Pill("PRO · Manual", icon = Icons.Rounded.Tune, modifier = modifier)
+        Pill("Manual mode", icon = Icons.Rounded.Tune, modifier = modifier)
         return
     }
     val text = when {
         vm.mode != ShootMode.AI -> "${vm.mode.title} mode"
-        vm.scene == Scene.GENERAL -> "AI · Scanning scene"
+        vm.scene == Scene.GENERAL -> "AI ready · just point & shoot"
         !vm.autoApply -> "AI suggests ${vm.scene.title}"
         else -> "AI · ${vm.scene.title}"
     }

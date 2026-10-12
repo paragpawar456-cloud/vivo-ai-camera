@@ -37,5 +37,5 @@ enum class ShootMode(val title: String, val icon: ImageVector, val scene: Scene?
     NIGHT("Night", Scene.NIGHT.icon, Scene.NIGHT),
     MACRO("Macro", Scene.MACRO.icon, Scene.MACRO),
     ACTION("Action", Scene.ACTION.icon, Scene.ACTION),
-    PRO("Pro", Icons.Rounded.Tune, null),
+    PRO("Manual", Icons.Rounded.Tune, null),
 }

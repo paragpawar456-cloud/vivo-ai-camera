@@ -71,14 +71,15 @@ fun GlassIcon(
     onClick: () -> Unit,
 ) {
     val tint by animateColorAsState(if (active) Pro.Gold else Pro.Text, label = "tint")
-    Box(
+    androidx.compose.foundation.layout.Column(
         Modifier
-            .size(size)
-            .clip(CircleShape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(icon, contentDescription = label, tint = tint, modifier = Modifier.size(22.dp).rotate(rotation))
+        Text(label, color = tint, fontSize = 9.sp, maxLines = 1)
     }
 }
 

@@ -94,7 +94,7 @@ fun AiPanel(vm: CameraViewModel) {
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    if (vm.scene == Scene.GENERAL) "AI Photographer" else "${vm.scene.title} detected",
+                    if (vm.scene == Scene.GENERAL) "Just point and press the big button" else "${vm.scene.title} detected",
                     color = Pro.Text, fontSize = 16.sp, fontWeight = FontWeight.Bold,
                 )
                 Text(shown.headline, color = Pro.TextDim, fontSize = 12.sp)
@@ -105,7 +105,7 @@ fun AiPanel(vm: CameraViewModel) {
                         checked = vm.autoApply, onCheckedChange = { vm.toggleAutoApply() },
                         colors = SwitchDefaults.colors(checkedTrackColor = Pro.Gold, checkedThumbColor = Color.Black),
                     )
-                    Text(if (vm.autoApply) "Auto-set" else "Suggest", color = Pro.TextDim, fontSize = 10.sp)
+                    Text(if (vm.autoApply) "AI sets camera" else "Only tips", color = Pro.TextDim, fontSize = 10.sp)
                 }
             }
         }
@@ -118,7 +118,10 @@ fun AiPanel(vm: CameraViewModel) {
         ) {
             Icon(Icons.Rounded.CameraEnhance, null, tint = Pro.Gold, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text(vm.dslrEquivalent(), color = Pro.Text, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+            Column {
+                Text("AI has set your camera like a pro DSLR:", color = Pro.TextDim, fontSize = 10.sp)
+                Text(vm.dslrEquivalent(), color = Pro.Text, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+            }
         }
 
         // Camera angle coach
@@ -201,17 +204,19 @@ fun ProPanel(vm: CameraViewModel) {
             )
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            DialChip(Icons.Rounded.Iso, "ISO", vm.proIso?.toString() ?: "A ${vm.liveIso}", vm.proIso != null, vm.proDial == ProDial.ISO) { vm.proDial = ProDial.ISO }
+            DialChip(Icons.Rounded.Iso, "SENSITIVITY", vm.proIso?.toString() ?: "A ${vm.liveIso}", vm.proIso != null, vm.proDial == ProDial.ISO) { vm.proDial = ProDial.ISO }
             DialChip(Icons.Rounded.ShutterSpeed, "SHUTTER", vm.proShutterNs?.let { Stops.shutterLabel(it) } ?: "A ${Stops.shutterLabel(vm.liveShutterNs)}", vm.proShutterNs != null, vm.proDial == ProDial.SHUTTER) { vm.proDial = ProDial.SHUTTER }
-            DialChip(Icons.Rounded.Exposure, "EV", "%+.1f".format(vm.userEv), vm.userEv != 0f, vm.proDial == ProDial.EV) { vm.proDial = ProDial.EV }
+            DialChip(Icons.Rounded.Exposure, "BRIGHTNESS", "%+.1f".format(vm.userEv), vm.userEv != 0f, vm.proDial == ProDial.EV) { vm.proDial = ProDial.EV }
         }
         Spacer(Modifier.height(6.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            DialChip(Icons.Rounded.WbAuto, "WB", vm.proWb.kelvin?.let { "${it}K" } ?: "AWB", vm.proWb != WhiteBalance.AUTO, vm.proDial == ProDial.WB) { vm.proDial = ProDial.WB }
+            DialChip(Icons.Rounded.WbAuto, "COLOUR", vm.proWb.kelvin?.let { "${it}K" } ?: "AWB", vm.proWb != WhiteBalance.AUTO, vm.proDial == ProDial.WB) { vm.proDial = ProDial.WB }
             DialChip(Icons.Rounded.CenterFocusStrong, "FOCUS", vm.proFocus?.let { focusLabel(it) } ?: "AF", vm.proFocus != null, vm.proDial == ProDial.FOCUS) { vm.proDial = ProDial.FOCUS }
-            DialChip(Icons.Rounded.Camera, "APERTURE", apertureLabel(vm), vm.proAperture != null || vm.virtualAperture != null, vm.proDial == ProDial.APERTURE) { vm.proDial = ProDial.APERTURE }
+            DialChip(Icons.Rounded.Camera, "BLUR", apertureLabel(vm), vm.proAperture != null || vm.virtualAperture != null, vm.proDial == ProDial.APERTURE) { vm.proDial = ProDial.APERTURE }
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
+        Text(dialHelp(vm.proDial), color = Pro.TextDim, fontSize = 11.sp)
+        Spacer(Modifier.height(8.dp))
 
         when (vm.proDial) {
             ProDial.ISO -> {
@@ -289,13 +294,13 @@ fun BokehPanel(vm: CameraViewModel) {
 
 @Composable
 private fun BokehDialBody(vm: CameraViewModel) {
-    Text("Background blur (virtual aperture)", color = Pro.Text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+    Text("Blur the background", color = Pro.Text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     Text(
-        "Phone lenses have a fixed ${Stops.fNumberLabel(vm.caps.baseAperture)} iris. ProLens recreates the shallow depth of field of a full-frame lens on the finished photo.",
+        "Makes your subject stand out like an expensive camera. Applied when the photo is saved. Stronger = softer background.",
         color = Pro.TextDim, fontSize = 11.sp,
     )
     Spacer(Modifier.height(8.dp))
-    StopRuler(listOf<Float?>(null) + Stops.VIRTUAL_APERTURES, vm.virtualAperture, { it?.let(Stops::fNumberLabel) ?: "OFF" }) {
+    StopRuler(listOf<Float?>(null, 8f, 4f, 2.8f, 1.8f, 1.4f), vm.virtualAperture, { blurLabel(it) }) {
         vm.pickVirtualAperture(it)
     }
 }
@@ -392,4 +397,22 @@ fun <T> StopRuler(options: List<T>, selected: T, label: (T) -> String, onPick: (
             }
         }
     }
+}
+
+private fun blurLabel(f: Float?): String = when {
+    f == null -> "Off"
+    f >= 8f -> "Tiny"
+    f >= 4f -> "Light"
+    f >= 2.8f -> "Medium"
+    f >= 1.8f -> "Strong"
+    else -> "Max"
+}
+
+private fun dialHelp(d: ProDial): String = when (d) {
+    ProDial.ISO -> "ISO = light sensitivity. Higher is brighter in the dark but adds grain. AUTO is best."
+    ProDial.SHUTTER -> "Shutter = how long the camera looks. 1/500 freezes motion; 1/15 is brighter but can blur."
+    ProDial.EV -> "Brightness. Slide + for a brighter photo, − for darker."
+    ProDial.WB -> "Colour of light. Pick Daylight, Cloudy, Tungsten (indoor bulbs) to fix yellow or blue photos."
+    ProDial.FOCUS -> "What's sharp. AF = automatic. Slide towards Macro for very close things."
+    ProDial.APERTURE -> "How blurry the background is."
 }

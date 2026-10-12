@@ -130,7 +130,7 @@ class CameraViewModel(app: Application) : AndroidViewModel(app) {
     var flash by mutableStateOf(FlashSetting.OFF); private set
     var timer by mutableIntStateOf(0); private set
     var grid by mutableStateOf(GridType.THIRDS); private set
-    var showHistogram by mutableStateOf(true); private set
+    var showHistogram by mutableStateOf(false); private set
     var showLevel by mutableStateOf(true); private set
     var vendorAvailable by mutableStateOf(false); private set
     var vendorOn by mutableStateOf(false); private set
@@ -195,6 +195,7 @@ class CameraViewModel(app: Application) : AndroidViewModel(app) {
                 null
             }
             bind()
+            say("Just point and press the big button. AI sets everything.")
         }
     }
 

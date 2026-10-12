@@ -526,8 +526,8 @@ class CameraViewModel(app: Application) : AndroidViewModel(app) {
             m == ShootMode.AI -> applyScene(Scene.GENERAL)
             m.scene != null -> {
                 applyScene(m.scene)
-                Photographer.idealZoom(recipe, caps, maxZoom)?.let { if (!userZoomed) setZoom(it) }
-                if (m.scene == Scene.LANDSCAPE && !userZoomed) setZoom(1f)
+                Photographer.idealZoom(recipe, caps, maxZoom)?.let { if (!userZoomed) zoomTo(it) }
+                if (m.scene == Scene.LANDSCAPE && !userZoomed) zoomTo(1f)
             }
             m == ShootMode.PRO -> {
                 scene = Scene.GENERAL
@@ -589,7 +589,7 @@ class CameraViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun setVirtualAperture(f: Float?) {
+    fun pickVirtualAperture(f: Float?) {
         apertureLocked = true
         virtualAperture = f
     }
@@ -599,11 +599,11 @@ class CameraViewModel(app: Application) : AndroidViewModel(app) {
         applyControls(force = true)
     }
 
-    fun setProIso(v: Int?) { proIso = v; applyControls(force = true) }
-    fun setProShutter(v: Long?) { proShutterNs = v; applyControls(force = true) }
-    fun setProWb(v: WhiteBalance) { proWb = v; applyControls(force = true) }
-    fun setProFocus(v: Float?) { proFocus = v; applyControls(force = true) }
-    fun setProAperture(v: Float?) { proAperture = v; applyControls(force = true) }
+    fun pickIso(v: Int?) { proIso = v; applyControls(force = true) }
+    fun pickShutter(v: Long?) { proShutterNs = v; applyControls(force = true) }
+    fun pickWb(v: WhiteBalance) { proWb = v; applyControls(force = true) }
+    fun pickFocus(v: Float?) { proFocus = v; applyControls(force = true) }
+    fun pickAperture(v: Float?) { proAperture = v; applyControls(force = true) }
 
     fun resetPro() {
         proIso = null; proShutterNs = null; proWb = WhiteBalance.AUTO; proFocus = null; proAperture = null
@@ -611,7 +611,7 @@ class CameraViewModel(app: Application) : AndroidViewModel(app) {
         applyControls(force = true)
     }
 
-    fun setZoom(ratio: Float) {
+    fun zoomTo(ratio: Float) {
         val r = ratio.coerceIn(minZoom, maxZoom)
         camera?.cameraControl?.setZoomRatio(r)
         zoom = r
@@ -619,7 +619,7 @@ class CameraViewModel(app: Application) : AndroidViewModel(app) {
 
     fun userZoom(ratio: Float) {
         userZoomed = true
-        setZoom(ratio)
+        zoomTo(ratio)
     }
 
     fun tapToFocus(viewPoint: Offset) {

@@ -216,17 +216,17 @@ fun ProPanel(vm: CameraViewModel) {
         when (vm.proDial) {
             ProDial.ISO -> {
                 val isos = Stops.ISOS.filter { it in c.minIso..c.maxIso }
-                StopRuler(listOf<Int?>(null) + isos, vm.proIso, { it?.toString() ?: "AUTO" }) { vm.setProIso(it) }
+                StopRuler(listOf<Int?>(null) + isos, vm.proIso, { it?.toString() ?: "AUTO" }) { vm.pickIso(it) }
             }
             ProDial.SHUTTER -> {
                 val list = Stops.SHUTTERS_NS.filter { it in c.exposureRangeNs.lower..c.exposureRangeNs.upper }
-                StopRuler(listOf<Long?>(null) + list, vm.proShutterNs, { it?.let(Stops::shutterLabel) ?: "AUTO" }) { vm.setProShutter(it) }
+                StopRuler(listOf<Long?>(null) + list, vm.proShutterNs, { it?.let(Stops::shutterLabel) ?: "AUTO" }) { vm.pickShutter(it) }
             }
             ProDial.EV -> {
                 val evs = (-9..9).map { it / 3f }
                 StopRuler(evs, vm.userEv, { if (it == 0f) "0" else "%+.1f".format(it) }) { vm.setEv(it) }
             }
-            ProDial.WB -> StopRuler(WhiteBalance.entries, vm.proWb, { it.label }) { vm.setProWb(it) }
+            ProDial.WB -> StopRuler(WhiteBalance.entries, vm.proWb, { it.label }) { vm.pickWb(it) }
             ProDial.FOCUS -> FocusDial(vm)
             ProDial.APERTURE -> ApertureDial(vm)
         }
@@ -256,11 +256,11 @@ private fun FocusDial(vm: CameraViewModel) {
         return
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Pill("AF", selected = vm.proFocus == null) { vm.setProFocus(null) }
+        Pill("AF", selected = vm.proFocus == null) { vm.pickFocus(null) }
         Spacer(Modifier.width(10.dp))
         Text("∞", color = Pro.TextDim, fontSize = 14.sp)
         Slider(
-            value = vm.proFocus ?: 0f, onValueChange = { vm.setProFocus(it) },
+            value = vm.proFocus ?: 0f, onValueChange = { vm.pickFocus(it) },
             valueRange = 0f..max, modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
             colors = SliderDefaults.colors(thumbColor = Pro.Gold, activeTrackColor = Pro.Gold),
         )
@@ -274,7 +274,7 @@ private fun ApertureDial(vm: CameraViewModel) {
     if (c.hasVariableAperture) {
         Text("Real lens aperture", color = Pro.TextDim, fontSize = 11.sp)
         Spacer(Modifier.height(4.dp))
-        StopRuler(listOf<Float?>(null) + c.apertures.sorted(), vm.proAperture, { it?.let(Stops::fNumberLabel) ?: "AUTO" }) { vm.setProAperture(it) }
+        StopRuler(listOf<Float?>(null) + c.apertures.sorted(), vm.proAperture, { it?.let(Stops::fNumberLabel) ?: "AUTO" }) { vm.pickAperture(it) }
         Spacer(Modifier.height(8.dp))
     }
     BokehDialBody(vm)
@@ -296,7 +296,7 @@ private fun BokehDialBody(vm: CameraViewModel) {
     )
     Spacer(Modifier.height(8.dp))
     StopRuler(listOf<Float?>(null) + Stops.VIRTUAL_APERTURES, vm.virtualAperture, { it?.let(Stops::fNumberLabel) ?: "OFF" }) {
-        vm.setVirtualAperture(it)
+        vm.pickVirtualAperture(it)
     }
 }
 

@@ -14,6 +14,8 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        // Vivo X300 Pro (and every modern phone) is 64-bit ARM; skipping other CPUs keeps the APK small
+        ndk { abiFilters += "arm64-v8a" }
     }
 
     buildTypes {

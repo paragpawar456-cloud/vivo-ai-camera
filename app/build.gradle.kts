@@ -39,6 +39,8 @@ android {
     }
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        // Compress the AI engines' native libraries inside the APK (much smaller download, same app)
+        jniLibs.useLegacyPackaging = true
     }
 }
 

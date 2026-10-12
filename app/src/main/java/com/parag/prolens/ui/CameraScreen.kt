@@ -208,31 +208,7 @@ fun CameraScreen(vm: CameraViewModel) {
             Toast(vm, Modifier.align(Alignment.Center))
         }
 
-        AnimatedVisibility(
-            vm.panel != Panel.NONE,
-            modifier = Modifier.align(Alignment.BottomCenter),
-            enter = fadeIn() + slideInVertically { it / 2 },
-            exit = fadeOut() + slideOutVertically { it / 2 },
-        ) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = panelMax)
-                    .verticalScroll(rememberScrollState())
-                    .padding(bottom = 6.dp)
-            ) {
-                when (vm.panel) {
-                    Panel.AI -> AiPanel(vm)
-                    Panel.PRO -> ProPanel(vm)
-                    Panel.LOOKS -> Box(
-                        Modifier.padding(horizontal = 12.dp).clip(RoundedCornerShape(20.dp))
-                            .background(Pro.Panel).padding(vertical = 12.dp)
-                    ) { LooksPanel(vm) }
-                    Panel.BOKEH -> BokehPanel(vm)
-                    Panel.NONE -> {}
-                }
-            }
-        }
+        PanelSheet(vm, panelMax, Modifier.align(Alignment.BottomCenter))
         }
 
         // ------------------------------------------------ tools
@@ -384,4 +360,33 @@ private fun Toast(vm: CameraViewModel, modifier: Modifier) {
             modifier = Modifier.clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.75f)).padding(horizontal = 16.dp, vertical = 9.dp),
         )
     }
+}
+
+@Composable
+private fun PanelSheet(vm: CameraViewModel, panelMax: androidx.compose.ui.unit.Dp, modifier: Modifier) {
+        AnimatedVisibility(
+            vm.panel != Panel.NONE,
+            modifier = modifier,
+            enter = fadeIn() + slideInVertically { it / 2 },
+            exit = fadeOut() + slideOutVertically { it / 2 },
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = panelMax)
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 6.dp)
+            ) {
+                when (vm.panel) {
+                    Panel.AI -> AiPanel(vm)
+                    Panel.PRO -> ProPanel(vm)
+                    Panel.LOOKS -> Box(
+                        Modifier.padding(horizontal = 12.dp).clip(RoundedCornerShape(20.dp))
+                            .background(Pro.Panel).padding(vertical = 12.dp)
+                    ) { LooksPanel(vm) }
+                    Panel.BOKEH -> BokehPanel(vm)
+                    Panel.NONE -> {}
+                }
+            }
+        }
 }
